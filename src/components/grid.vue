@@ -1,7 +1,8 @@
 <template>
   <div>
-    <div class="grid-container" :style="style(grid.col)"  v-for="(grid,i) in grids"  :key="i" >
-      <div class="grid-item"   v-for="i in grid.col" :key="i">
+    <div class="grid-container" :style="style(grid)"  v-for="(grid,i) in grids"  :key="'container ' + i" >
+      <div class="grid-item"  v-for="col in grid.col" :key="'container '+ i + 'col ' + col">
+          <slot name="a"></slot>
       </div>
     </div>
   </div>
@@ -15,17 +16,21 @@ export default {
       type: Array,
       required: true
     },
+    slots: {
+      type: Array,
+      required: true
+    }
   },
   data() {
     return {
-     a : []
+     a : [],
     }
   },
   methods: {
-    style(col) {
+    style(grid) {
         // eslint-disable-next-line no-unused-vars
-       return { 'grid-template-columns' : Array.from({length: col},  (_,i) => (i = 'auto ')).toString().replaceAll(',','')}
-    }
+       return [{ 'grid-template-columns' : Array.from({length: grid.col},  (_,i) => (i = 'auto ')).toString().replaceAll(',','')},{'grid-auto-rows': grid.size.toString().concat('px')}]
+    },
   },
 }
 </script>
@@ -35,6 +40,8 @@ export default {
   display: grid;
   background: whitesmoke;
   padding: 10px;
+  grid-column-gap: 50px;
+
 }
 
 .grid-item {

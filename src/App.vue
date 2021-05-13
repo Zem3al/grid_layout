@@ -1,8 +1,10 @@
 <template>
   <div id="app">
-    <input v-model="col">
+    COL: <input v-model="col">
+    SIZE: <input v-model="size">
     <button @click.prevent="add" > ADD</button>
-    <grid :grids="grids"></grid>
+    <grid ref="grid" :grids="grids" :slots.sync="slots"></grid>
+    <button @click.prevent="alo"> Click Me!</button>
   </div>
 </template>
 
@@ -14,19 +16,35 @@ export default {
   components: {
     grid
   },
+  computed:{
+    keys() {
+      console.log(this.$refs.grid)
+      return 1
+    }
+  },
   data () {
     return {
       grids: [],
       col: 0,
+      size: 100,
+      slots: [],
     }
   },
   mounted() {
-    this.grids.push({col: 3 })
+    this.grids.push({col: 3, size:100 })
+    this.slots.push(
+        ...Array.from({ length: 3 }, (v, i) => (v = { in: this.slots.length + i, use: false }))
+    );
   },
   methods: {
     add() {
-      this.grids.push({col: parseInt(this.col)})
-      console.log(this.grids)
+      this.grids.push({col: parseInt(this.col), size: parseInt(this.size)})
+      this.slots.push(
+          ...Array.from({ length: this.col }, (v, i) => (v = { in: this.slots.length + i, use: false }))
+      );
+    },
+    alo() {
+      console.log(this.$refs.grid)
     }
   }
 }
