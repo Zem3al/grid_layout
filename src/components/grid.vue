@@ -1,16 +1,25 @@
 <template>
   <div>
+
     <div class="grid-container" :style="style(grid)"  v-for="(grid,i) in grids"  :key="'container ' + i" >
       <div class="grid-item"  v-for="col in grid.col" :key="'container '+ i + 'col ' + col">
+        <draggable >
           <slot name="a"></slot>
+        </draggable>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+
+import draggable from 'vuedraggable'
+
 export default {
   name: "grid",
+  components: {
+    draggable,
+  },
   props: {
     grids: {
       type: Array,
@@ -24,6 +33,7 @@ export default {
   data() {
     return {
      a : [],
+      testemplate: "<div"
     }
   },
   methods: {
