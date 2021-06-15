@@ -1,14 +1,21 @@
 <template>
   <div>
-
         <draggable v-model="cells">
           <transition-group tag="div" class="grid-container" name="grid">
-            <div class="grid-item" v-for="(cell,i) in cells" :key="i" :style="style(cell)">
-              <slot :name=i>{{ cell.wid }}</slot>
+            <div class="grid-item" v-for="(cell,i) in cells" :key="`${i}${cell.wid}`" :style="style(cell)">
+              <slot :name=i>
+                <div v-if="content[cell.wid]">
+                  <div v-html="content[cell.wid]"> </div>
+                </div>
+                <div v-else>
+                <div class="circle" @click="insertItem(cell.wid)">
+                <div class="line roltage"> </div>
+                <div class="line"> </div>
+                </div>
+              </div></slot>
             </div>
           </transition-group>
         </draggable>
-
   </div>
 </template>
 <script>
@@ -25,13 +32,16 @@ export default {
       type: Object,
       required: true
     },
+    content: {
+      type: Array,
+      required: true
+    }
   },
   computed: {
     cells: {
       get: function () {
         let cells = []
         this.layout.rows.forEach((grid, row) => {
-          console.log(this.layout.wid)
           // eslint-disable-next-line no-unused-vars
           cells.push(...Array.from({length: grid}, (v, i) => (v = {
             row: row + 1,
@@ -71,8 +81,21 @@ export default {
     },
     updateLayout(newValue) {
       this.$emit('update:layout', newValue)
-    }
+    },
+    updateBreakPage(component) {
+      const GridContainers = document.getElementsByClassName('grid-container')
+      for(let i = 0 ;i <component ;i ++) {
+        console.log(GridContainers[i])
+      }
+    },
+    LogInfomation() {
+      console.log(this.layout)
+    },
+    insertItem(id) {
+      this.$emit('turnOnmodal',id)
+    },
   },
+
 }
 </script>
 
@@ -81,16 +104,44 @@ export default {
   display: grid;
   background: whitesmoke;
   padding: 10px;
-  grid-column-gap: 50px;
+  grid-column-gap: 20px;
   grid-template-columns:  auto auto auto auto auto auto auto auto auto auto auto auto;
-  grid-column-gap: 50px;
+  grid-column-gap: 20px;
   grid-row-gap: 50px;
 }
 
 .grid-item {
   border: 1px dashed rgba(0, 0, 0, 0.8);
-  padding: 20px;
+  padding: 10px;
   font-size: 30px;
   text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.circle {
+  border-radius: 50%;
+  height: 40px;
+  width: 40px;
+  position: relative;
+}
+
+.circle:hover {
+  background: white;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.line {
+  width: 20px;
+  height: 2px;
+  background: black;
+  position: absolute;
+  top: 47%;
+  right: 24%;
+}
+
+.roltage {
+  transform: rotate(90deg);
 }
 </style>
