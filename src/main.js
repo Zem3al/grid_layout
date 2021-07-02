@@ -1,9 +1,9 @@
 import Vue from 'vue'
-import CKEditor from '@ckeditor/ckeditor5-vue2';
 import App from './App.vue'
+import CKEditor from '@ckeditor/ckeditor5-vue2';
 
+Vue.use( CKEditor );
 Vue.config.productionTip = false
-Vue.use(CKEditor)
 
 new Vue({
   render: h => h(App),

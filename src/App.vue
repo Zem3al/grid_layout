@@ -1,34 +1,38 @@
 <template>
   <div id="app">
-    <div v-show="false">
-    <ckeditor :editor="editor" v-model="editorData" :config="editorConfig"></ckeditor>
-    </div>
     <div class="modal" v-show="modal" @click="closeModal">
       <div class="modal-holder" @click.prevent="">
         <h3> ADD AN ELEMENT TO WHAT EVER</h3>
         <div style="display: flex;align-items: center;justify-content: center">
-        <button class="btnn">
+        <button class="btnn" @click.prevent="changeTab(1)">
           Widgets
         </button >
-          <button class="btnn">
+          <button class="btnn" @click.prevent="changeTab(2)">
             Text
           </button>
-          <button class="btnn">
+          <button class="btnn" @click.prevent="changeTab(3)">
             Photo
           </button>
         </div>
         <div class="modal-content">
         <div class="widget" v-if="tab == 1">
-          <h3> Insert A Rectangle</h3>
-          <div >WIDTH: <input v-model="width"> </div>
-          <div>
-            HEIGHT: <input v-model="heigh">
-          </div>
-          <div> <button @click="addObject"> Submit</button> </div>
         </div>
           <div class="text" v-if="tab == 2">
+            <select v-model="widget">
+              <option value="pie">Circle</option>
+              <option value="line">Line Graph</option>
+              <option value="table">Table</option>
+            </select>
+            <div style="display: flex; justify-content: space-between">
+              <SVGLoader :type="widget" :height="200" :width="200"></SVGLoader>
+              <div>
+                <button @click.prevent="saveWiget()">Save</button>
+                Time:
+                Date:
+              </div>
+            </div>
           </div>
-          <div class="photo" v-if="tab == 3">
+          <div  class="photo" v-if="tab == 3">
           </div>
         </div>
       </div>
@@ -37,77 +41,90 @@
     SIZE: <input v-model="size">
     <button @click.prevent="add"> ADD</button>
     <button @click.prevent="print_layout" class="btnfly"> See PrintLayout</button>
-    <vue-html2pdf
-        class="vuehtml"
-        :show-layout="true"
-        :float-layout="false"
-        :enable-download="true"
-        :preview-modal="true"
-        :paginate-elements-by-height="1400"
-        filename="hee hee"
-        :pdf-quality="2"
-        :manual-pagination="true"
-        pdf-format="a4"
-        pdf-orientation="landscape"
-        pdf-content-width="1000px"
-
-        ref="html2Pdf"
-    >
-      <section slot="pdf-content" >
-        <grid_test :layout.sync="layout" :content="content" v-on:turnOnmodal="turnOnModal">
-        </grid_test>
-      </section>
-    </vue-html2pdf>
+    <div style="max-width: 100vw">
+      <grid_test :id="key" :layout.sync="reportLayout" :content.sync="content" @turnOnmodal="turnOnModal" />
+    </div>
   </div>
 </template>
 
 <script>
+import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
+import SVGLoader from "./components/SVGLoader";
+import EssentialsPlugin from '@ckeditor/ckeditor5-essentials/src/essentials';
+import BoldPlugin from '@ckeditor/ckeditor5-basic-styles/src/bold';
+import ItalicPlugin from '@ckeditor/ckeditor5-basic-styles/src/italic';
+import LinkPlugin from '@ckeditor/ckeditor5-link/src/link';
+import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
+
+
 import grid_test from "./components/grid_test";
-import VueHtml2pdf from 'vue-html2pdf'
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 export default {
   name: 'App',
+  watch: {
+    content () {
+      console.log('hallo')
+    }
+  },
   components: {
     grid_test,
-    VueHtml2pdf,
+    SVGLoader
   },
   computed: {},
   data() {
     return {
-      col: 0,
+      col: 4,
+      key: 0,
       size: 100,
       slots: [],
-      layout: {
+      widspan: {},
+      reportLayout: {
         rows: [],
         wid: [],
+      },
+      content: {},
+      widget: '',
+      editor: ClassicEditor,
+      editorData: '<p>Content of the editor.</p>',
+      editorConfig: {
+        plugins: [
+          EssentialsPlugin,
+          BoldPlugin,
+          ItalicPlugin,
+          LinkPlugin,
+          ParagraphPlugin
+        ],
+        toolbar: {
+          items: [
+            'bold',
+            'italic',
+            'link',
+            'undo',
+            'redo'
+          ]
+        }
       },
       printlayout: false,
       modal : false,
       editing : 0,
-      editor: ClassicEditor,
-      editorData: '<p>Content of the editor.</p>',
-      editorConfig: {
-        toolbar: [
-          'heading', 'fontFamily', 'undo', 'redo'
-        ]
-      },
-      content : [],
       tab: 1,
-      width: 100,
-      heigh: 200,
     }
-  },
-  watch: {
   },
   mounted() {
     this.layout.rows.push(3)
     this.layout.wid.push(0, 1, 2)
+    this.lmao = ClassicEditor
   },
   methods: {
-    add() {
-      this.layout.rows.push(parseInt(this.col))
-      this.layout.wid.push(...Array.from({length: this.col}, (v, i) => (v = this.layout.wid.length + i)))
+    lmaoxd(evt) {
+      console.log(evt.plugins)
+    },
+    add () {
+      this.reportLayout.rows.push(parseInt(this.col))
+      Array.from({ length: this.col }, (v, i) => (v = this.reportLayout.wid.length + i)).forEach((wid) => {
+        this.reportLayout.wid.push(wid)
+        this.content[wid] = { span: 12 / (parseInt(this.col)) }
+      })
     },
     print_layout() {
       this.printlayout =  !this.printlayout
@@ -125,6 +142,9 @@ export default {
       const body = `<div style="width: ${this.width}px;height: ${this.heigh}px;background: #42b983">TESTING</div>`
       this.modal = false
       this.$set(this.content,this.editing,body)
+    },
+    changeTab(tab) {
+      this.tab = tab
     }
   }
 }

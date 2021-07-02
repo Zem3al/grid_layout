@@ -1,9 +1,16 @@
 <template>
   <div style="position: relative">
+    <div>
+      {{this.now}}
+      {{this.mouse}}
+      <button @click.prevent="addBreaker"> Add Page Breaker</button>
+    </div>
   <div class="rectangle" ref="para">
     TESTING
-    <div class="page_break" :style="style" @mousedown="enableDrag" @mouseup="disenableDrag" @mousemove="drag" >
+    <div v-for="(pa,id) in pageBreakerPos" :key="pa.name">
+    <div class="page_break" ref="page" :style="style" @mousemove="drag($event,id,pa.name)" @mousedown="enableDrag($event,pa.name)" @mouseup="disenableDrag(pa.name)" >
     ----------------------------------- Page Break -------------------------------------
+    </div>
     </div>
   </div>
 
@@ -13,12 +20,16 @@
 <script>
 
 
+
 export default {
   name: "PageBreaker",
   data: () => {
     return {
-      dragable: false,
-      top: 0
+      dragable: new Object(),
+      top: 0,
+      mouse : 0,
+      pageBreakerPos: [],
+      now: 0
     }
   },
   computed: {
@@ -27,19 +38,29 @@ export default {
     }
   },
   methods: {
-    enableDrag() {
-      this.dragable = true
+    enableDrag(e,name) {
+      this.dragable[name] = true
+      this.mouse = e.clientY
     },
-    disenableDrag() {
-      this.dragable = false
+    disenableDrag(name) {
+      this.dragable[name] = false
     },
-    drag(e) {
-      if(this.dragable) {
-          console.log(e.layerX)
-          this.top = e.layerX
+    drag(e,id,name) {
+      console.log(e,id,name)
+      if(e.buttons == 0) {
+        this.dragable[name] = false
       }
+      if(this.dragable[name]) {
+        e.preventDefault();
+        this.now = this.mouse - e.clientY
+        this.mouse = e.clientY
+        this.$refs.page[id].style.top = (this.$refs.page[id].offsetTop - this.now) + "px";
+      }
+    },
+    addBreaker() {
+      this.pageBreakerPos.push({name: `page_breaker${this.pageBreakerPos.length}`})
     }
-  }
+  },
 }
 </script>
 
@@ -58,9 +79,10 @@ export default {
   z-index: 1;
   background: rgba(0, 0, 0, 0);
   right: 70px;
-  font-size: 24px;
+  font-size: 40px;
   color: chartreuse;
   cursor: pointer;
+  user-select:none;
 }
 
 </style>
